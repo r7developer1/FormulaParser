@@ -1,0 +1,17 @@
+{
+    "name": "r7dev/formula-parser",
+    "authors": [
+        {
+            "name": "r7developer1",
+            "email": "82050523+r7developer1@users.noreply.github.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "application"
+        }
+    },
+    "require": {
+        "antlr/antlr4-php-runtime": "^0.5.1"
+    }
+}
