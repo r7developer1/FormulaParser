@@ -8,7 +8,7 @@ include_once 'application/Library/Formula/FormulaParser/FormulaParser.php';
 use Antlr\Antlr4\Runtime\CommonTokenStream;
 use Antlr\Antlr4\Runtime\Error\Listeners\DiagnosticErrorListener;
 use Antlr\Antlr4\Runtime\InputStream;
-use Antlr\Antlr4\Runtime\Tree\ParseTreeWalker;
+use App\Library\Formula\Formula;
 use App\Library\Formula\FormulaLexer;
 use App\Library\Formula\FormulaParser;
 
@@ -18,15 +18,15 @@ $tokens = new CommonTokenStream($lexer);
 $parser = new FormulaParser($tokens);
 $parser->addErrorListener(new DiagnosticErrorListener());
 $parser->setBuildParseTree(true);
-$tree = $parser->operation();
+$expression = $parser->expression();
 
-$operation = $tree->OPERATION()->getText();
+$calc = new Formula($expression);
 
+try {
+    $res = $calc->calculate($calc->getOperation() , $calc->getArguments());
 
-$args = array_reduce($tree->NUMBER() , function ($memo , $val){
-    array_push($memo, $val->getText());
-    return $memo;
-},[]);
+    var_dump($res);
+}catch (Exception $e){
+    echo $e->getMessage();
+}
 
-$calc = new \App\Library\Formula\Formula($operation, $args);
-var_dump($calc->calculate());

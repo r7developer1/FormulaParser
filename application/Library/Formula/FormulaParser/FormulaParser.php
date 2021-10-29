@@ -23,30 +23,31 @@ namespace App\Library\Formula {
 
 	final class FormulaParser extends Parser
 	{
-		public const T__0 = 1, T__1 = 2, NUMBER = 3, OPERATION = 4, ARGUMENT_SEPERATOR = 5, 
-               WHITESPACE = 6;
+		public const OPERATION = 1, ARGUMENT_SEPARATOR = 2, ARG_LIST_START = 3, 
+               ARG_LIST_END = 4, NUMBER = 5, WHITESPACE = 6;
 
-		public const RULE_operation = 0;
+		public const RULE_expression = 0, RULE_argument = 1;
 
 		/**
 		 * @var array<string>
 		 */
 		public const RULE_NAMES = [
-			'operation'
+			'expression', 'argument'
 		];
 
 		/**
 		 * @var array<string|null>
 		 */
 		private const LITERAL_NAMES = [
-		    null, "'('", "')'", null, null, "','", "' '"
+		    null, null, "','", "'('", "')'", null, "' '"
 		];
 
 		/**
 		 * @var array<string>
 		 */
 		private const SYMBOLIC_NAMES = [
-		    null, null, null, "NUMBER", "OPERATION", "ARGUMENT_SEPERATOR", "WHITESPACE"
+		    null, "OPERATION", "ARGUMENT_SEPARATOR", "ARG_LIST_START", "ARG_LIST_END", 
+		    "NUMBER", "WHITESPACE"
 		];
 
 		/**
@@ -54,39 +55,20 @@ namespace App\Library\Formula {
 		 */
 		private const SERIALIZED_ATN =
 			"\u{3}\u{608B}\u{A72A}\u{8133}\u{B9ED}\u{417C}\u{3BE7}\u{7786}\u{5964}" .
-		    "\u{3}\u{8}\u{30}\u{4}\u{2}\u{9}\u{2}\u{3}\u{2}\u{7}\u{2}\u{6}\u{A}" .
-		    "\u{2}\u{C}\u{2}\u{E}\u{2}\u{9}\u{B}\u{2}\u{3}\u{2}\u{3}\u{2}\u{7}" .
-		    "\u{2}\u{D}\u{A}\u{2}\u{C}\u{2}\u{E}\u{2}\u{10}\u{B}\u{2}\u{3}\u{2}" .
-		    "\u{3}\u{2}\u{7}\u{2}\u{14}\u{A}\u{2}\u{C}\u{2}\u{E}\u{2}\u{17}\u{B}" .
-		    "\u{2}\u{3}\u{2}\u{3}\u{2}\u{7}\u{2}\u{1B}\u{A}\u{2}\u{C}\u{2}\u{E}" .
-		    "\u{2}\u{1E}\u{B}\u{2}\u{3}\u{2}\u{3}\u{2}\u{7}\u{2}\u{22}\u{A}\u{2}" .
-		    "\u{C}\u{2}\u{E}\u{2}\u{25}\u{B}\u{2}\u{3}\u{2}\u{3}\u{2}\u{7}\u{2}" .
-		    "\u{29}\u{A}\u{2}\u{C}\u{2}\u{E}\u{2}\u{2C}\u{B}\u{2}\u{3}\u{2}\u{3}" .
-		    "\u{2}\u{3}\u{2}\u{2}\u{2}\u{3}\u{2}\u{2}\u{2}\u{2}\u{34}\u{2}\u{7}" .
-		    "\u{3}\u{2}\u{2}\u{2}\u{4}\u{6}\u{7}\u{8}\u{2}\u{2}\u{5}\u{4}\u{3}" .
-		    "\u{2}\u{2}\u{2}\u{6}\u{9}\u{3}\u{2}\u{2}\u{2}\u{7}\u{5}\u{3}\u{2}" .
-		    "\u{2}\u{2}\u{7}\u{8}\u{3}\u{2}\u{2}\u{2}\u{8}\u{A}\u{3}\u{2}\u{2}" .
-		    "\u{2}\u{9}\u{7}\u{3}\u{2}\u{2}\u{2}\u{A}\u{E}\u{7}\u{6}\u{2}\u{2}" .
-		    "\u{B}\u{D}\u{7}\u{8}\u{2}\u{2}\u{C}\u{B}\u{3}\u{2}\u{2}\u{2}\u{D}" .
-		    "\u{10}\u{3}\u{2}\u{2}\u{2}\u{E}\u{C}\u{3}\u{2}\u{2}\u{2}\u{E}\u{F}" .
-		    "\u{3}\u{2}\u{2}\u{2}\u{F}\u{11}\u{3}\u{2}\u{2}\u{2}\u{10}\u{E}\u{3}" .
-		    "\u{2}\u{2}\u{2}\u{11}\u{15}\u{7}\u{3}\u{2}\u{2}\u{12}\u{14}\u{7}\u{8}" .
-		    "\u{2}\u{2}\u{13}\u{12}\u{3}\u{2}\u{2}\u{2}\u{14}\u{17}\u{3}\u{2}\u{2}" .
-		    "\u{2}\u{15}\u{13}\u{3}\u{2}\u{2}\u{2}\u{15}\u{16}\u{3}\u{2}\u{2}\u{2}" .
-		    "\u{16}\u{18}\u{3}\u{2}\u{2}\u{2}\u{17}\u{15}\u{3}\u{2}\u{2}\u{2}\u{18}" .
-		    "\u{1C}\u{7}\u{5}\u{2}\u{2}\u{19}\u{1B}\u{7}\u{8}\u{2}\u{2}\u{1A}\u{19}" .
-		    "\u{3}\u{2}\u{2}\u{2}\u{1B}\u{1E}\u{3}\u{2}\u{2}\u{2}\u{1C}\u{1A}\u{3}" .
-		    "\u{2}\u{2}\u{2}\u{1C}\u{1D}\u{3}\u{2}\u{2}\u{2}\u{1D}\u{1F}\u{3}\u{2}" .
-		    "\u{2}\u{2}\u{1E}\u{1C}\u{3}\u{2}\u{2}\u{2}\u{1F}\u{23}\u{7}\u{7}\u{2}" .
-		    "\u{2}\u{20}\u{22}\u{7}\u{8}\u{2}\u{2}\u{21}\u{20}\u{3}\u{2}\u{2}\u{2}" .
-		    "\u{22}\u{25}\u{3}\u{2}\u{2}\u{2}\u{23}\u{21}\u{3}\u{2}\u{2}\u{2}\u{23}" .
-		    "\u{24}\u{3}\u{2}\u{2}\u{2}\u{24}\u{26}\u{3}\u{2}\u{2}\u{2}\u{25}\u{23}" .
-		    "\u{3}\u{2}\u{2}\u{2}\u{26}\u{2A}\u{7}\u{5}\u{2}\u{2}\u{27}\u{29}\u{7}" .
-		    "\u{8}\u{2}\u{2}\u{28}\u{27}\u{3}\u{2}\u{2}\u{2}\u{29}\u{2C}\u{3}\u{2}" .
-		    "\u{2}\u{2}\u{2A}\u{28}\u{3}\u{2}\u{2}\u{2}\u{2A}\u{2B}\u{3}\u{2}\u{2}" .
-		    "\u{2}\u{2B}\u{2D}\u{3}\u{2}\u{2}\u{2}\u{2C}\u{2A}\u{3}\u{2}\u{2}\u{2}" .
-		    "\u{2D}\u{2E}\u{7}\u{4}\u{2}\u{2}\u{2E}\u{3}\u{3}\u{2}\u{2}\u{2}\u{8}" .
-		    "\u{7}\u{E}\u{15}\u{1C}\u{23}\u{2A}";
+		    "\u{3}\u{8}\u{17}\u{4}\u{2}\u{9}\u{2}\u{4}\u{3}\u{9}\u{3}\u{3}\u{2}" .
+		    "\u{3}\u{2}\u{3}\u{2}\u{3}\u{2}\u{3}\u{2}\u{7}\u{2}\u{C}\u{A}\u{2}" .
+		    "\u{C}\u{2}\u{E}\u{2}\u{F}\u{B}\u{2}\u{3}\u{2}\u{3}\u{2}\u{3}\u{3}" .
+		    "\u{3}\u{3}\u{5}\u{3}\u{15}\u{A}\u{3}\u{3}\u{3}\u{2}\u{2}\u{4}\u{2}" .
+		    "\u{4}\u{2}\u{2}\u{2}\u{16}\u{2}\u{6}\u{3}\u{2}\u{2}\u{2}\u{4}\u{14}" .
+		    "\u{3}\u{2}\u{2}\u{2}\u{6}\u{7}\u{7}\u{3}\u{2}\u{2}\u{7}\u{8}\u{7}" .
+		    "\u{5}\u{2}\u{2}\u{8}\u{D}\u{5}\u{4}\u{3}\u{2}\u{9}\u{A}\u{7}\u{4}" .
+		    "\u{2}\u{2}\u{A}\u{C}\u{5}\u{4}\u{3}\u{2}\u{B}\u{9}\u{3}\u{2}\u{2}" .
+		    "\u{2}\u{C}\u{F}\u{3}\u{2}\u{2}\u{2}\u{D}\u{B}\u{3}\u{2}\u{2}\u{2}" .
+		    "\u{D}\u{E}\u{3}\u{2}\u{2}\u{2}\u{E}\u{10}\u{3}\u{2}\u{2}\u{2}\u{F}" .
+		    "\u{D}\u{3}\u{2}\u{2}\u{2}\u{10}\u{11}\u{7}\u{6}\u{2}\u{2}\u{11}\u{3}" .
+		    "\u{3}\u{2}\u{2}\u{2}\u{12}\u{15}\u{7}\u{7}\u{2}\u{2}\u{13}\u{15}\u{5}" .
+		    "\u{2}\u{2}\u{2}\u{14}\u{12}\u{3}\u{2}\u{2}\u{2}\u{14}\u{13}\u{3}\u{2}" .
+		    "\u{2}\u{2}\u{15}\u{5}\u{3}\u{2}\u{2}\u{2}\u{4}\u{D}\u{14}";
 
 		protected static $atn;
 		protected static $decisionToDFA;
@@ -151,92 +133,75 @@ namespace App\Library\Formula {
 		/**
 		 * @throws RecognitionException
 		 */
-		public function operation() : Context\OperationContext
+		public function expression() : Context\ExpressionContext
 		{
-		    $localContext = new Context\OperationContext($this->ctx, $this->getState());
+		    $localContext = new Context\ExpressionContext($this->ctx, $this->getState());
 
-		    $this->enterRule($localContext, 0, self::RULE_operation);
+		    $this->enterRule($localContext, 0, self::RULE_expression);
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(5);
-		        $this->errorHandler->sync($this);
-
-		        $_la = $this->input->LA(1);
-		        while ($_la === self::WHITESPACE) {
-		        	$this->setState(2);
-		        	$this->match(self::WHITESPACE);
-		        	$this->setState(7);
-		        	$this->errorHandler->sync($this);
-		        	$_la = $this->input->LA(1);
-		        }
-		        $this->setState(8);
+		        $this->setState(4);
 		        $this->match(self::OPERATION);
-		        $this->setState(12);
+		        $this->setState(5);
+		        $this->match(self::ARG_LIST_START);
+		        $this->setState(6);
+		        $this->argument();
+		        $this->setState(11);
 		        $this->errorHandler->sync($this);
 
 		        $_la = $this->input->LA(1);
-		        while ($_la === self::WHITESPACE) {
-		        	$this->setState(9);
-		        	$this->match(self::WHITESPACE);
-		        	$this->setState(14);
+		        while ($_la === self::ARGUMENT_SEPARATOR) {
+		        	$this->setState(7);
+		        	$this->match(self::ARGUMENT_SEPARATOR);
+		        	$this->setState(8);
+		        	$this->argument();
+		        	$this->setState(13);
 		        	$this->errorHandler->sync($this);
 		        	$_la = $this->input->LA(1);
 		        }
-		        $this->setState(15);
-		        $this->match(self::T__0);
-		        $this->setState(19);
+		        $this->setState(14);
+		        $this->match(self::ARG_LIST_END);
+		    } catch (RecognitionException $exception) {
+		        $localContext->exception = $exception;
+		        $this->errorHandler->reportError($this, $exception);
+		        $this->errorHandler->recover($this, $exception);
+		    } finally {
+		        $this->exitRule();
+		    }
+
+		    return $localContext;
+		}
+
+		/**
+		 * @throws RecognitionException
+		 */
+		public function argument() : Context\ArgumentContext
+		{
+		    $localContext = new Context\ArgumentContext($this->ctx, $this->getState());
+
+		    $this->enterRule($localContext, 2, self::RULE_argument);
+
+		    try {
+		        $this->setState(18);
 		        $this->errorHandler->sync($this);
 
-		        $_la = $this->input->LA(1);
-		        while ($_la === self::WHITESPACE) {
-		        	$this->setState(16);
-		        	$this->match(self::WHITESPACE);
-		        	$this->setState(21);
-		        	$this->errorHandler->sync($this);
-		        	$_la = $this->input->LA(1);
-		        }
-		        $this->setState(22);
-		        $this->match(self::NUMBER);
-		        $this->setState(26);
-		        $this->errorHandler->sync($this);
+		        switch ($this->input->LA(1)) {
+		            case self::NUMBER:
+		            	$this->enterOuterAlt($localContext, 1);
+		            	$this->setState(16);
+		            	$this->match(self::NUMBER);
+		            	break;
 
-		        $_la = $this->input->LA(1);
-		        while ($_la === self::WHITESPACE) {
-		        	$this->setState(23);
-		        	$this->match(self::WHITESPACE);
-		        	$this->setState(28);
-		        	$this->errorHandler->sync($this);
-		        	$_la = $this->input->LA(1);
-		        }
-		        $this->setState(29);
-		        $this->match(self::ARGUMENT_SEPERATOR);
-		        $this->setState(33);
-		        $this->errorHandler->sync($this);
+		            case self::OPERATION:
+		            	$this->enterOuterAlt($localContext, 2);
+		            	$this->setState(17);
+		            	$this->expression();
+		            	break;
 
-		        $_la = $this->input->LA(1);
-		        while ($_la === self::WHITESPACE) {
-		        	$this->setState(30);
-		        	$this->match(self::WHITESPACE);
-		        	$this->setState(35);
-		        	$this->errorHandler->sync($this);
-		        	$_la = $this->input->LA(1);
+		        default:
+		        	throw new NoViableAltException($this);
 		        }
-		        $this->setState(36);
-		        $this->match(self::NUMBER);
-		        $this->setState(40);
-		        $this->errorHandler->sync($this);
-
-		        $_la = $this->input->LA(1);
-		        while ($_la === self::WHITESPACE) {
-		        	$this->setState(37);
-		        	$this->match(self::WHITESPACE);
-		        	$this->setState(42);
-		        	$this->errorHandler->sync($this);
-		        	$_la = $this->input->LA(1);
-		        }
-		        $this->setState(43);
-		        $this->match(self::T__1);
 		    } catch (RecognitionException $exception) {
 		        $localContext->exception = $exception;
 		        $this->errorHandler->reportError($this, $exception);
@@ -259,7 +224,7 @@ namespace App\Library\Formula\Context {
 	use App\Library\Formula\FormulaParser;
 	use App\Library\Formula\FormulaListener;
 
-	class OperationContext extends ParserRuleContext
+	class ExpressionContext extends ParserRuleContext
 	{
 		public function __construct(?ParserRuleContext $parent, ?int $invokingState = null)
 		{
@@ -268,7 +233,7 @@ namespace App\Library\Formula\Context {
 
 		public function getRuleIndex() : int
 		{
-		    return FormulaParser::RULE_operation;
+		    return FormulaParser::RULE_expression;
 	    }
 
 	    public function OPERATION() : ?TerminalNode
@@ -276,46 +241,88 @@ namespace App\Library\Formula\Context {
 	        return $this->getToken(FormulaParser::OPERATION, 0);
 	    }
 
-	    /**
-	     * @return array<TerminalNode>|TerminalNode|null
-	     */
-	    public function NUMBER(?int $index = null)
+	    public function ARG_LIST_START() : ?TerminalNode
 	    {
-	    	if ($index === null) {
-	    		return $this->getTokens(FormulaParser::NUMBER);
-	    	}
-
-	        return $this->getToken(FormulaParser::NUMBER, $index);
-	    }
-
-	    public function ARGUMENT_SEPERATOR() : ?TerminalNode
-	    {
-	        return $this->getToken(FormulaParser::ARGUMENT_SEPERATOR, 0);
+	        return $this->getToken(FormulaParser::ARG_LIST_START, 0);
 	    }
 
 	    /**
-	     * @return array<TerminalNode>|TerminalNode|null
+	     * @return array<ArgumentContext>|ArgumentContext|null
 	     */
-	    public function WHITESPACE(?int $index = null)
+	    public function argument(?int $index = null)
 	    {
 	    	if ($index === null) {
-	    		return $this->getTokens(FormulaParser::WHITESPACE);
+	    		return $this->getTypedRuleContexts(ArgumentContext::class);
 	    	}
 
-	        return $this->getToken(FormulaParser::WHITESPACE, $index);
+	        return $this->getTypedRuleContext(ArgumentContext::class, $index);
+	    }
+
+	    public function ARG_LIST_END() : ?TerminalNode
+	    {
+	        return $this->getToken(FormulaParser::ARG_LIST_END, 0);
+	    }
+
+	    /**
+	     * @return array<TerminalNode>|TerminalNode|null
+	     */
+	    public function ARGUMENT_SEPARATOR(?int $index = null)
+	    {
+	    	if ($index === null) {
+	    		return $this->getTokens(FormulaParser::ARGUMENT_SEPARATOR);
+	    	}
+
+	        return $this->getToken(FormulaParser::ARGUMENT_SEPARATOR, $index);
 	    }
 
 		public function enterRule(ParseTreeListener $listener) : void
 		{
 			if ($listener instanceof FormulaListener) {
-			    $listener->enterOperation($this);
+			    $listener->enterExpression($this);
 		    }
 		}
 
 		public function exitRule(ParseTreeListener $listener) : void
 		{
 			if ($listener instanceof FormulaListener) {
-			    $listener->exitOperation($this);
+			    $listener->exitExpression($this);
+		    }
+		}
+	} 
+
+	class ArgumentContext extends ParserRuleContext
+	{
+		public function __construct(?ParserRuleContext $parent, ?int $invokingState = null)
+		{
+			parent::__construct($parent, $invokingState);
+		}
+
+		public function getRuleIndex() : int
+		{
+		    return FormulaParser::RULE_argument;
+	    }
+
+	    public function NUMBER() : ?TerminalNode
+	    {
+	        return $this->getToken(FormulaParser::NUMBER, 0);
+	    }
+
+	    public function expression() : ?ExpressionContext
+	    {
+	    	return $this->getTypedRuleContext(ExpressionContext::class, 0);
+	    }
+
+		public function enterRule(ParseTreeListener $listener) : void
+		{
+			if ($listener instanceof FormulaListener) {
+			    $listener->enterArgument($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener) : void
+		{
+			if ($listener instanceof FormulaListener) {
+			    $listener->exitArgument($this);
 		    }
 		}
 	} 

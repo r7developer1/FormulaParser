@@ -1,14 +1,16 @@
 // Derived from http://json.org
 grammar Formula;
-
-/*
- * Parser Rules
- */
-operation  : WHITESPACE* OPERATION WHITESPACE* '(' WHITESPACE* NUMBER WHITESPACE* ARGUMENT_SEPERATOR WHITESPACE* NUMBER WHITESPACE* ')' ;
-/*
- * Lexer Rules
- */
-NUMBER     : [0-9]+;
+// ============================================================================
+// PARSER RULES
+// ============================================================================
+expression: OPERATION ARG_LIST_START argument ( ARGUMENT_SEPARATOR argument )* ARG_LIST_END;
+argument: NUMBER | expression;
+// ============================================================================
+// LEXER RULES
+// ============================================================================
 OPERATION : ('DIV') | ('MUL') | ('SUM') | ('SUB');
-ARGUMENT_SEPERATOR : ',';
-WHITESPACE : ' ' -> skip ;
+ARGUMENT_SEPARATOR: ',';
+ARG_LIST_START: '(';
+ARG_LIST_END: ')';
+NUMBER     : [0-9]+;
+WHITESPACE : ' ' -> skip;

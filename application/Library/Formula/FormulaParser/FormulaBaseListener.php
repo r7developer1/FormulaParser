@@ -22,14 +22,27 @@ class FormulaBaseListener implements FormulaListener
 	 *
 	 * The default implementation does nothing.
 	 */
-	public function enterOperation(Context\OperationContext $context) : void {}
+	public function enterExpression(Context\ExpressionContext $context) : void {}
 
 	/**
 	 * {@inheritdoc}
 	 *
 	 * The default implementation does nothing.
 	 */
-	public function exitOperation(Context\OperationContext $context) : void {}
+	public function exitExpression(Context\ExpressionContext $context) : void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function enterArgument(Context\ArgumentContext $context) : void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitArgument(Context\ArgumentContext $context) : void {}
 
 	/**
 	 * {@inheritdoc}
