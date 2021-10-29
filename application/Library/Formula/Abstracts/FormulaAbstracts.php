@@ -72,7 +72,7 @@ abstract class FormulaAbstracts
     protected function div($args)
     {
         $res = null;
-        $reversed_args = array_reverse($args);
+        $reversed_args = $args;
         for($i = 0; $i < count($reversed_args); $i++){
             if (array_key_exists(($i + 1) , $reversed_args)){
                 if ($res != null){
