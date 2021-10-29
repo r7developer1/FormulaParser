@@ -15,7 +15,7 @@ class Formula extends FormulaAbstracts
             throw new \Exception("Illegal operation or arguments provided. Please check your formula");
         }elseif ($operation == '<missing OPERATION>'){
             throw new \Exception("Invalid Formula");
-        }elseif(array_filter($arguments, function($val) { return !is_numeric($val); })){
+        }elseif(array_filter($arguments, function($val) { return !$val; })){
             throw new \Exception("Invalid Arguments provided");
         }
         $values = array_map( function( $arg ) {
